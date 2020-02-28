@@ -58,3 +58,4 @@
 {"message":"The bookmark titled I like cats was created successfully.","level":"info"}
 {"message":"The bookmark titled I like cats was created successfully.","level":"info"}
 {"message":"The bookmark titled sdfsdf was created successfully.","level":"info"}
+{"message":"Bookmark with id 2 successfully deleted.","level":"info"}

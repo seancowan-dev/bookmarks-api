@@ -78,7 +78,7 @@ bookmarkRouter
     const { id } = req.params;
 
     const index = store.findIndex(item => {
-        return item.id === parseInt(id);
+        item.id == id;
     })
 
     if (index.length === -1) {
