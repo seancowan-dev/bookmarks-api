@@ -59,3 +59,5 @@
 {"message":"The bookmark titled I like cats was created successfully.","level":"info"}
 {"message":"The bookmark titled sdfsdf was created successfully.","level":"info"}
 {"message":"Bookmark with id 2 successfully deleted.","level":"info"}
+{"message":"Unauthorized request to path: /","level":"error"}
+{"message":"Unauthorized request to path: /bookmarks","level":"error"}

@@ -1,3 +1,5 @@
+const dotenv = require('dotenv');
+dotenv.config();
 const { expect } = require('chai');
 const supertest = require('supertest');
 
