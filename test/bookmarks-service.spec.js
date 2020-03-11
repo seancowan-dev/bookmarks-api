@@ -33,7 +33,7 @@ describe('Bookmarks Service Object | Endpoints', () =>{
             .expect(200, []);
         });
         it('GET /bookmarks/:id | Responds with 404 and error message', () => {
-            const bookmarkId = 12;
+            const bookmarkId = 50;
             return supertest(app)
             .get(`/bookmarks/${bookmarkId}`)
             .set('Authorization', 'Bearer ' + process.env.API_TOKEN)
@@ -168,16 +168,16 @@ describe('Bookmarks Service Object | Endpoints', () =>{
           })
         })
     
-        context('Given there are articles in the database', () => {
+        context('Given there are bookmarks in the database', () => {
           const testBookmarks = makeBookmarksArray();
     
-          beforeEach('insert articles', () => {
+          beforeEach('insert bookmarks', () => {
             return db
               .into('bookmarks_entries')
               .insert(testBookmarks)
           })
     
-          it('responds with 204 and removes the article', () => {
+          it('responds with 204 and removes the bookmark', () => {
             const idToRemove = 96
             return supertest(app)
               .delete(`/bookmarks/${idToRemove}`)
@@ -185,6 +185,66 @@ describe('Bookmarks Service Object | Endpoints', () =>{
               .expect(204)
           })
         })
-      })
+      });
+
+    describe(`| PATCH Test Object |`,  () => {
+        context(`Given no bookmarks`, () => {
+            it(`| PATCH /bookmarks/:id | Responds with 404`, () => {
+                const bookmarkId = 23231;
+                return supertest(app)
+                    .patch(`/bookmarks/${bookmarkId}`)
+                    .set('Authorization', 'Bearer ' + process.env.API_TOKEN)
+                    .expect(404, { error: {message: `Could not find bookmark with that ID.`} })
+            })
+        })
+
+        context('Given bookmarks exist', () => {
+            const testBookmarks = makeBookmarksArray();
+
+            beforeEach('insert bookmarks', () => {
+                return db
+                .into('bookmarks_entries')
+                .insert(testBookmarks)
+            });
+
+            it('| PATCH /bookmarks/:id | Responds with 204 and updates the bookmark', () => {
+                const idToUpdate = 95
+                const updateBookmark = {
+                    title: 'updated bookmark title',
+                    description: 'updated bookmark description',
+                    rating: "3",
+                    url: 'updated url'
+                }
+                const expected = {
+                    ...testBookmarks[idToUpdate],
+                    ...updateBookmark
+                }
+
+                return supertest(app)
+                    .patch(`/bookmarks/${idToUpdate}`)
+                    .set('Authorization', 'Bearer ' + process.env.API_TOKEN)
+                    .send(updateBookmark)
+                    .expect(204)
+                    .then(res => {
+                        supertest(app)
+                            .get(`/bookmarks/${idToUpdate}`)
+                            .expect(expected)
+                    })
+            });
+
+            it('| PATCH /bookmarks/:id | Responds with 400 when no required fields supplied', () => {
+                const idToUpdate = 96;
+                return supertest(app)
+                    .patch(`/bookmarks/${idToUpdate}`)
+                    .set('Authorization', 'Bearer ' + process.env.API_TOKEN)
+                    .send({ irrelevantField: 'foo'})
+                    .expect(400, {
+                        error: {
+                            message: `Request body must content either 'title', 'url', 'description' or 'rating'`
+                        }
+                    })
+            });
+        })
+    });
 });
 

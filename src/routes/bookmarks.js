@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const logger = require('../logging/logger');
 const xss = require('xss');
@@ -79,7 +80,7 @@ bookmarkRouter
       .then(bookmark => {
         res
         .status(201)
-        .location(`/bookmarks/${bookmark.id}`)
+        .location(path.posix.join(req.originalUrl,`/${bookmark.id}`))
         .json(serializeBookmark(bookmark))
       })
 
@@ -130,6 +131,37 @@ bookmarkRouter
     });
 
   }
-);
+)
+.patch(bodyParser, (req, res, next) => {
+  const { id } = req.params;
+  const knexInstance = req.app.get('db');
+  const { title, url, rating, description } = req.body;
+  const newBookmark = { title, url, rating, description };
+  const numberOfValues = Object.values(newBookmark).filter(Boolean).length
 
+  BookmarksService.getBookmarkById(knexInstance, id)
+  .then(bookmark => {
+    if (!bookmark) {
+      return res.status(404).json({
+        error: { message: 'Could not find bookmark with that ID.' }
+      });
+    }
+      if (numberOfValues === 0 ) {
+        return res.status(400).json({
+          error: {
+            message: `Request body must content either 'title', 'url', 'description' or 'rating'`
+          }
+        })
+      }
+      BookmarksService.updateBookmark(
+        knexInstance,
+        id,
+        newBookmark
+      )
+      .then(affected => {
+        res.status(204).end()
+      })
+      .catch(next)
+    });
+  });
 module.exports = bookmarkRouter;
